@@ -83,6 +83,7 @@
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>
+          <a href="src\routes\users\new\+page.svelte.html" target="_blank">Cadastre-se aqui</a>
       </form>
     </Card>
   </div>
