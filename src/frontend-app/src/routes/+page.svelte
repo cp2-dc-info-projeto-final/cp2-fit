@@ -1,17 +1,49 @@
 <script lang="ts">
-  import { Heading } from 'flowbite-svelte';
-  import Menu from '../components/Menu.svelte';
-  import {  P, ImagePlaceholder, Skeleton, TextPlaceholder } from "flowbite-svelte";
-</script>
+	import { Heading, P, Button } from 'flowbite-svelte';
+	import { goto } from '$app/navigation';
+	import Menu from '../components/Menu.svelte';
+  
 
-<Menu />
-
-<div class="text-center p-8 pt-32">
-	<Heading tag="h2" class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">Menu</Heading>
-	<P class="text-lg leading-relaxed text-gray-700 dark:text-gray-300 mb-4 text-justify">
-		Lorem 
+	let usuarioLogado = false;
+  
+	async function handleAcao() {
+	  if (usuarioLogado) {
+		// usuário logado
+		await goto('/matricula');
+	  } else {
+		// usuário não logado
+		await goto('/login');
+	  }
+	}
+  </script>
+  
+  <Menu />
+  
+  <div class="text-center p-8 pt-32">
+	<Heading
+	  tag="h2"
+	  class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6"
+	>
+	  Bem Vindo A CP2FIT
+	</Heading>
+  
+	<P class="text-lg leading-relaxed text-gray-700 dark:text-gray-300 mb-6 text-justify">
+	  Cp2 fit é a rede acadêmica para os alunos do cp2 que querem praticar
+	  atividades físicas na área escolar.
+	  <br /><br />
+	  Para se cadastrar clique no botão abaixo.
 	</P>
-	<Skeleton class="mt-16 mb-8" />
-	<ImagePlaceholder class="my-8" />
-	<TextPlaceholder class="my-8" />
-</div>
+  
+
+	<Button
+	  size="lg"
+	  color={usuarioLogado ? 'green' : 'blue'}
+	  onclick={handleAcao}
+	>
+	  {#if usuarioLogado}
+		Fazer Matrícula
+	  {:else}
+		Faça Login para se Matricular
+	  {/if}
+	</Button>
+  </div>

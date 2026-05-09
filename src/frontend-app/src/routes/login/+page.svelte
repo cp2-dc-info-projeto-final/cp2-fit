@@ -8,6 +8,10 @@
   let loading = false;
   let error = '';
 
+  async function handleCadastro() {
+    await goto('/cadastro');
+  }
+
   async function handleLogin() {
     if (!login || !password) {
       error = 'Por favor, preencha todos os campos';
@@ -83,7 +87,10 @@
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </Button>
-          <a href="src\routes\users\new\+page.svelte.html" target="_blank">Cadastre-se aqui</a>
+
+
+    <Button type="button"color="light"class="w-full" onclick={handleCadastro}> Criar Conta  </Button>
+
       </form>
     </Card>
   </div>
