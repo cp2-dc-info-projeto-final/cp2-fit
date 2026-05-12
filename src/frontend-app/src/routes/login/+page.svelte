@@ -7,7 +7,7 @@
   let password = '';
   let loading = false;
   let error = '';
-
+  
   async function handleCadastro() {
     await goto('/cadastro');
   }

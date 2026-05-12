@@ -87,6 +87,7 @@
   <!-- Tabela para telas médias/grandes -->
   <div class="hidden xl:block">
     <!-- Tabela de usuários -->
+    <input type="search" id="busca" placeholder="digite o nome do aluno">
     <Table class="w-full max-w-5xl mx-auto my-8 shadow-lg border border-gray-200 rounded-lg">
       <TableHead>
         <TableHeadCell class="w-16">ID</TableHeadCell>

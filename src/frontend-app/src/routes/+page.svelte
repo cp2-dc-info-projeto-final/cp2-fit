@@ -2,14 +2,23 @@
 	import { Heading, P, Button } from 'flowbite-svelte';
 	import { goto } from '$app/navigation';
 	import Menu from '../components/Menu.svelte';
+	import { onMount } from 'svelte';
+  	import { getCurrentUser } from '$lib/auth';
   
 
 	let usuarioLogado = false;
+
+	onMount(async () => {
+		const user = await getCurrentUser();
+		if (user) {
+			usuarioLogado = true;
+		}
+	});
   
 	async function handleAcao() {
 	  if (usuarioLogado) {
 		// usuário logado
-		await goto('/matricula');
+		await goto('/about');
 	  } else {
 		// usuário não logado
 		await goto('/login');
