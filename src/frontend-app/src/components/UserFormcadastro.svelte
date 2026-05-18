@@ -25,26 +25,7 @@
     return fieldErrors.find((item) => item.field === field)?.message ?? null;
   }
 
-  // Carrega usuário se for edição
-  onMount(async () => {
-    if (id !== null) {
-      loading = true;
-      try {
-        const res = await api.get(`/users/${id}`);
-        const body = res.data as ApiResponse<User>;
-        if (body.success && body.data) {
-          user = { ...body.data, senha: '' }; // não carrega senha na edição
-        } else {
-          error = body.message;
-        }
-      } catch (e: any) {
-        const body = e.response?.data as ApiResponse<User> | undefined;
-        error = body?.message || 'Erro ao carregar usuário.';
-      } finally {
-        loading = false;
-      }
-    } 
-  });
+
 
   // Submissão do formulário
   async function handleSubmit() {
@@ -73,7 +54,7 @@
       }
       
       if (id === null) {
-        const res = await api.post('/users', userData);
+        const res = await api.post('/users/cadastroVisitante', userData);
         const body = res.data as ApiResponse<User>;
         if (!body.success) {
           error = body.message;
@@ -89,7 +70,7 @@
           return;
         }
       }
-      goto('/users');
+      goto('/users/');
     } catch (e: any) {
       const body = e.response?.data as ApiResponse<User> | undefined;
       error = body?.message || 'Erro ao salvar usuário.';

@@ -15,6 +15,7 @@
   let deletingId: number | null = null; // id em deleção
   let confirmOpen = false; // modal aberto?
   let confirmTargetId: number | null = null; // id alvo do modal
+  let filtro: ""
 
   // Abre modal de confirmação
   function openConfirm(id: number) {
