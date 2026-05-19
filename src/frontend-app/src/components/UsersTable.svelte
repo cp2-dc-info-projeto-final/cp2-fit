@@ -15,7 +15,25 @@
   let deletingId: number | null = null; // id em deleção
   let confirmOpen = false; // modal aberto?
   let confirmTargetId: number | null = null; // id alvo do modal
-  let filtro: ""
+  let filtro = "";
+
+  async function filtraUsuarios(){
+    try {
+      const res = await api.get(`/users?login=${encodeURIComponent(filtro)}`);
+      const body = res.data as ApiResponse<User[]>;
+      if (body.success) {
+        users = body.data ?? [];
+      } else {
+        error = body.message;
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar usuários:', e);
+      const body = e.response?.data as ApiResponse<User[]> | undefined;
+      error = body?.message || 'Erro ao carregar usuários';
+    } finally {
+      loading = false;
+    }
+  }
 
   // Abre modal de confirmação
   function openConfirm(id: number) {
@@ -88,7 +106,7 @@
   <!-- Tabela para telas médias/grandes -->
   <div class="hidden xl:block">
     <!-- Tabela de usuários -->
-    <input type="search" id="busca" placeholder="digite o nome do aluno" bind:value={filtro}>
+    <input type="search" id="busca" placeholder="digite o nome do aluno" bind:value={filtro} on:input={filtraUsuarios}>
     <Table class="w-full max-w-5xl mx-auto my-8 shadow-lg border border-gray-200 rounded-lg">
       <TableHead>
         <TableHeadCell class="w-16">ID</TableHeadCell>
