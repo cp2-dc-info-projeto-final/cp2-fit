@@ -54,7 +54,7 @@
       }
       
       if (id === null) {
-        const res = await api.post('/users/cadastroVisitante', userData);
+        const res = await api.post('/users/register', userData);
         const body = res.data as ApiResponse<User>;
         if (!body.success) {
           error = body.message;
