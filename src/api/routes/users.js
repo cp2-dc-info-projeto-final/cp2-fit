@@ -272,6 +272,127 @@ router.post('/login', async function(req, res) {
   }
 });
 
+/* PUT - Atualizar usuário */
+router.put('/:id', verifyToken, isAdmin, async function (req, res) {
+  try {
+    const { id } = req.params;
+    const { login, email, senha, role } = req.body;
+
+    // Validação
+    const errors = [];
+
+    if (!login) {
+      errors.push({
+        field: 'login',
+        message: 'Login é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+
+    if (!email) {
+      errors.push({
+        field: 'email',
+        message: 'Email é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+
+    if (!role) {
+      errors.push({
+        field: 'role',
+        message: 'Perfil é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+
+    if (errors.length > 0) {
+      return sendError(res, 400, 'Dados inválidos', errors);
+    }
+
+    // Verifica se o usuário existe
+    const userExists = await pool.query(
+      'SELECT id FROM usuario WHERE id = $1',
+      [id]
+    );
+
+    if (userExists.rows.length === 0) {
+      return sendError(res, 404, 'Usuário não encontrado');
+    }
+
+    // Verifica login duplicado
+    const loginExists = await pool.query(
+      'SELECT id FROM usuario WHERE login = $1 AND id <> $2',
+      [login, id]
+    );
+
+    if (loginExists.rows.length > 0) {
+      return sendError(res, 409, 'Login já está em uso', [
+        {
+          field: 'login',
+          message: 'Login já está em uso',
+          code: 'CONFLICT'
+        }
+      ]);
+    }
+
+    // Verifica email duplicado
+    const emailExists = await pool.query(
+      'SELECT id FROM usuario WHERE email = $1 AND id <> $2',
+      [email, id]
+    );
+
+    if (emailExists.rows.length > 0) {
+      return sendError(res, 409, 'Email já está em uso', [
+        {
+          field: 'email',
+          message: 'Email já está em uso',
+          code: 'CONFLICT'
+        }
+      ]);
+    }
+
+    let result;
+
+    // Atualiza com senha nova
+    if (senha && senha.trim() !== '') {
+      const senhaHash = await bcrypt.hash(senha, 12);
+
+      result = await pool.query(
+        `UPDATE usuario
+         SET login = $1,
+             email = $2,
+             senha = $3,
+             role = $4
+         WHERE id = $5
+         RETURNING id, login, email, role`,
+        [login, email, senhaHash, role, id]
+      );
+    } else {
+      // Atualiza sem alterar senha
+      result = await pool.query(
+        `UPDATE usuario
+         SET login = $1,
+             email = $2,
+             role = $3
+         WHERE id = $4
+         RETURNING id, login, email, role`,
+        [login, email, role, id]
+      );
+    }
+
+    return sendSuccess(
+      res,
+      200,
+      'Usuário atualizado com sucesso',
+      result.rows[0]
+    );
+
+  } catch (error) {
+    console.error('Erro ao atualizar usuário:', error);
+    return sendError(res, 500, 'Erro interno do servidor');
+  }
+});
+
 /* DELETE - Remover usuário */
 router.delete('/:id', verifyToken, isAdmin, async function(req, res) {
   try {

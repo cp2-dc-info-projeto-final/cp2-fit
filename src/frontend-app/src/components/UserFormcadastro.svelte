@@ -129,6 +129,15 @@
         <div class="mt-1 text-sm text-red-500">{errorOf('senha')}</div>
       {/if}
     </div>
+    <!--horarios de disponibilidade-->
+    <div> 
+      <Label for="horario">horario</Label>
+      <select id="horario" required>
+        <option value="" disabled>Selecione o horario</option>
+      </select>
+
+
+    </div>
 
     <!-- Botões de ação -->
     <div class="flex gap-4 justify-end mt-4">
