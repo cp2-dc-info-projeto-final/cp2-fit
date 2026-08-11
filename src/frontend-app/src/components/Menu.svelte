@@ -83,9 +83,10 @@
     <NavUl>
       <NavLi href="/" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Home</NavLi>
       <NavLi href="/about" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Sobre</NavLi>
-      
+     
       {#if hasToken}
         {#if user} <!-- se existir usuário é porque conseguiu logar-->
+        <NavLi href="/edição" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Edit</NavLi>
           {#if user.role === 'admin'} <!-- só exibe menu usuários para admin-->
             <NavLi href="/users" class="text-lg font-bold px-4 py-2 text-primary-500 dark:text-primary-400 hover:text-yellow-300 hover:bg-gray-700 focus:text-yellow-400 focus:bg-gray-700 transition-colors rounded-lg">Usuários</NavLi>
           {/if}

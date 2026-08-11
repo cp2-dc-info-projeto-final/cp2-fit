@@ -20,7 +20,7 @@ CREATE TABLE usuario (
     CONSTRAINT ck_usuario_role_valid CHECK (role IN ('admin', 'user')) -- tipos de usuário
 );
 
-INSERT INTO usuario (login, email, senha, role) VALUES
+INSERT INTO usuario (login, email, senha, horario, role ) VALUES
 -- senha efelantinho
 ('hermenegildo', 'hermenegildo@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','manhã', 'admin'),
 ('zoroastra', 'zoroastra@email.com', '$2a$12$f2c.uHGHS4drfaz6HR870OLamkarD57kI.gkr4//Vbbp0vN9IrFfG','noite', 'user');

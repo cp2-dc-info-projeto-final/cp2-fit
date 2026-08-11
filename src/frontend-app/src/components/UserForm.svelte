@@ -10,12 +10,18 @@
 
   export let id: number | null = null; // id do usuário
 
-  let user: UserFormData = { id: 0, login: '', email: '', senha: '', role: 'user' }; // dados do form
+  let user: UserFormData = { id: 0, login: '', email: '', senha: '',horario: '', role: 'user' }; // dados do form
   
   // Opções de roles
   const roleOptions = [
     { value: 'user', name: 'Usuário' },
     { value: 'admin', name: 'Administrador' }
+  ];
+    // Opções de horario
+    const horarioOptions = [
+    { value: 'manhã', name: 'Manhã' },
+    { value: 'tarde', name: 'Tarde' },
+    { value: 'noite', name: 'Noite' }
   ];
   let loading = false;
   let error = '';
@@ -32,6 +38,7 @@
       try {
         const res = await api.get(`/users/${id}`);
         const body = res.data as ApiResponse<User>;
+          console.log(body)
         if (body.success && body.data) {
           user = { ...body.data, senha: '' }; // não carrega senha na edição
         } else {
@@ -154,6 +161,14 @@
       <Select id="role" bind:value={user.role} items={roleOptions} class="mt-1" />
       {#if errorOf('role')}
         <div class="mt-1 text-sm text-red-500">{errorOf('role')}</div>
+      {/if}
+    </div>
+     <!-- Campo horario -->
+     <div>
+      <Label for="horario">Horário</Label>
+      <Select id="horario" bind:value={user.horario} items={horarioOptions} class="mt-1" />
+      {#if errorOf('horario')}
+        <div class="mt-1 text-sm text-red-500">{errorOf('horario')}</div>
       {/if}
     </div>
     <!-- Botões de ação -->
