@@ -58,7 +58,7 @@
     fieldErrors = [];
 
     // Validação de senha
-    if (id === null && (!user.senha || user.senha.length < 6)) {
+    if ((user.senha && user.senha.length < 6)) {
       fieldErrors = [{ field: 'senha', message: 'Senha deve ter pelo menos 6 caracteres.' }];
       error = 'Senha deve ter pelo menos 6 caracteres.';
       return;
@@ -75,27 +75,19 @@
     try {
       const userData = { ...user };
       // Remove senha vazia na edição para não sobrescrever indevidamente
-      if (id !== null && !userData.senha) {
+      if (!userData.senha) {
         delete userData.senha;
       }
       
-      if (id === null) {
-        const res = await api.post('/users', userData);
+ 
+        const res = await api.put(`/users/me`, userData);
         const body = res.data as ApiResponse<User>;
         if (!body.success) {
           error = body.message;
           fieldErrors = body.errors;
           return;
         }
-      } else {
-        const res = await api.put(`/users/${id}`, userData);
-        const body = res.data as ApiResponse<User>;
-        if (!body.success) {
-          error = body.message;
-          fieldErrors = body.errors;
-          return;
-        }
-      }
+      
       goto('/users');
     } catch (e: any) {
       const body = e.response?.data as ApiResponse<User> | undefined;
@@ -140,14 +132,12 @@
     </div>
     <!-- Campo senha -->
     <div>
-      <Label for="senha">Senha {id !== null ? '(deixe vazio para manter atual)' : ''}</Label>
+      <Label for="senha">Senha {'(deixe vazio para manter atual)'}</Label>
       <Input 
         id="senha" 
         type="password" 
         bind:value={user.senha} 
-        placeholder={id === null ? 'Digite a senha (mínimo 6 caracteres)' : 'Nova senha (opcional)'} 
-        required={id === null}
-        minlength={6}
+        placeholder={'Nova senha (opcional)'} 
         class="mt-1" 
       />
       {#if errorOf('senha')}

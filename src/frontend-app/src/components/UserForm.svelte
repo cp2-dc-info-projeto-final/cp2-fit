@@ -15,7 +15,9 @@
   // Opções de roles
   const roleOptions = [
     { value: 'user', name: 'Usuário' },
-    { value: 'admin', name: 'Administrador' }
+    { value: 'admin', name: 'Administrador' },
+    { value: 'professor', name: 'professor' }
+
   ];
     // Opções de horario
     const horarioOptions = [
