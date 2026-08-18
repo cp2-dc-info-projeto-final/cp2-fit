@@ -135,6 +135,57 @@ router.post('/', verifyToken, isAdmin, async function(req, res) {
   }
 });
 
+router.post('/me', verifyToken, async function(req, res) {
+  try {
+    const { login, email, senha, horario, role = 'user' } = req.body;
+    
+    // Validação básica
+    if (!login || !email || !senha ) {
+      const errors = [];
+      if (!login) errors.push({ field: 'login', message: 'Login é obrigatório', code: 'REQUIRED' });
+      if (!email) errors.push({ field: 'email', message: 'Email é obrigatório', code: 'REQUIRED' });
+      if (!senha) errors.push({ field: 'senha', message: 'Senha é obrigatória', code: 'REQUIRED' });
+
+      return sendError(res, 400, 'Login, email, senha são obrigatórios', errors);
+    }
+    
+    // Verificar se o login já existe
+    const existingUser = await pool.query('SELECT id FROM usuario WHERE login = $1', [login]);
+    if (existingUser.rows.length > 0) {
+      return sendError(res, 409, 'Login já está em uso', [
+        { field: 'login', message: 'Login já está em uso', code: 'CONFLICT' }
+      ]);
+    }
+
+    // Verificar se o email já existe
+    const existingEmail = await pool.query('SELECT id FROM usuario WHERE email = $1', [email]);
+    if (existingEmail.rows.length > 0) {
+      return sendError(res, 409, 'Email já está em uso', [
+        { field: 'email', message: 'Email já está em uso', code: 'CONFLICT' }
+      ]);
+    }
+
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(senha, 12);
+
+    const result = await pool.query(
+      'INSERT INTO usuario (login, email, senha, horario, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, login, email, horario, role',
+      [login, email, hashedPassword, horario, role]
+    );
+
+    return sendSuccess(res, 201, 'Usuário criado com sucesso', result.rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error);
+    // Verificar se é erro de constraint
+    if (error.code === '23514') {
+      return sendError(res, 400, 'Dados inválidos. Verifique os campos e tente novamente.');
+    }
+    return sendError(res, 500, 'Erro interno do servidor');
+  }
+});
+
+
+
 /* POST - Cadastro público */
 router.post('/register', async function(req, res) {
   try {
@@ -278,6 +329,139 @@ router.post('/login', async function(req, res) {
     return sendError(res, 500, 'Erro interno do servidor');
   }
 });
+
+
+
+// atualiza usuario ele mesmo
+router.put('/me', verifyToken, async function (req, res) {
+  try {
+    const id  = req.user.id;
+    console.log(id);
+    const { login, email, senha, horario, role } = req.body;
+
+    // Validação
+    const errors = [];
+
+    if (!login) {
+      errors.push({
+        field: 'login',
+        message: 'Login é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+
+    if (!email) {
+      errors.push({
+        field: 'email',
+        message: 'Email é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+    if (!horario) {
+      errors.push({
+        field: 'horario',
+        message: 'Horário é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+    if (!role) {
+      errors.push({
+        field: 'role',
+        message: 'Perfil é obrigatório',
+        code: 'REQUIRED'
+      });
+    }
+
+    if (errors.length > 0) {
+      return sendError(res, 400, 'Dados inválidos', errors);
+    }
+
+    // Verifica se o usuário existe
+    const userExists = await pool.query(
+      'SELECT id FROM usuario WHERE id = $1',
+      [id]
+    );
+
+    if (userExists.rows.length === 0) {
+      return sendError(res, 404, 'Usuário não encontrado');
+    }
+
+    // Verifica login duplicado
+    const loginExists = await pool.query(
+      'SELECT id FROM usuario WHERE login = $1 AND id <> $2',
+      [login, id]
+    );
+
+    if (loginExists.rows.length > 0) {
+      return sendError(res, 409, 'Login já está em uso', [
+        {
+          field: 'login',
+          message: 'Login já está em uso',
+          code: 'CONFLICT'
+        }
+      ]);
+    }
+
+    // Verifica email duplicado
+    const emailExists = await pool.query(
+      'SELECT id FROM usuario WHERE email = $1 AND id <> $2',
+      [email, id]
+    );
+
+    if (emailExists.rows.length > 0) {
+      return sendError(res, 409, 'Email já está em uso', [
+        {
+          field: 'email',
+          message: 'Email já está em uso',
+          code: 'CONFLICT'
+        }
+      ]);
+    }
+
+    let result;
+
+    // Atualiza com senha nova
+    if (senha && senha.trim() !== '') {
+      const senhaHash = await bcrypt.hash(senha, 12);
+
+      result = await pool.query(
+        `UPDATE usuario
+         SET login = $1,
+             email = $2,
+             senha = $3,
+             horario = $4,
+             role = $5
+         WHERE id = $6
+         RETURNING id, login, email, horario, role`,
+        [login, email, senhaHash, horario, role, id]
+      );
+    } else {
+      // Atualiza sem alterar senha
+      result = await pool.query(
+        `UPDATE usuario
+         SET login = $1,
+             email = $2,
+             horario = $3,
+             role = $4
+         WHERE id = $5
+         RETURNING id, login, email, horario, role`,
+        [login, email, horario, role, id]
+      );
+    }
+
+    return sendSuccess(
+      res,
+      200,
+      'Usuário atualizado com sucesso',
+      result.rows[0]
+    );
+
+  } catch (error) {
+    console.error('Erro ao atualizar usuário:', error);
+    return sendError(res, 500, 'Erro interno do servidor');
+  }
+});
+
 
 /* PUT - Atualizar usuário */
 router.put('/:id', verifyToken, isAdmin, async function (req, res) {
